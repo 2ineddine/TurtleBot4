@@ -1,7 +1,4 @@
-
-
-
-#@@@@@@@@@@@@@@@@@@@ 2ineddine
+# author : @2ineddine
 """"
 Interactive LiDAR Point Cloud Visualizer with Two-Point Selection
 Modified version with two-point selection and automatic range selection.
@@ -49,6 +46,7 @@ from tf2_ros import Buffer, LookupException
 
 class InteractiveLiDARVisualizer:
     def __init__(self, cam_info: CameraInfo,output_csv="lidar_selection_log.csv"):
+        self.current_frame_number = 0  
         self.cam_info = cam_info
         self.paused = False
         self.quit_requested = False
@@ -56,7 +54,12 @@ class InteractiveLiDARVisualizer:
         self.current_frame = None
         self.current_lidar_points = None
         self.current_uv_points = None
-
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.output_csv = f"{output_csv}_{now}.csv"        # Write CSV header if file does not exist
+        if not os.path.exists(self.output_csv):
+            with open(self.output_csv, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['frame', 'lidar_index', 'distance', 'u', 'v'])
         # Selection state
         self.selection_step = 0
         self.first_selected_point = None
@@ -68,23 +71,19 @@ class InteractiveLiDARVisualizer:
         self.selected_range_indices = []
 
         # Setup matplotlib figure
-        self.fig, self.ax = plt.subplots(1, 1, figsize=(14, 10))
+        self.fig, (self.ax_text, self.ax_img) = plt.subplots(1, 2, figsize=(14, 8), gridspec_kw={'width_ratios': [1, 2]})
+
         self.fig.suptitle('Interactive LiDAR Two-Point Selection Visualizer')
-        self.ax.set_title('Camera Feed with LiDAR Overlay')
-        self.ax.set_aspect('equal')
+        self.ax_img.set_title('Camera Feed with LiDAR Overlay')
+        self.ax_img.set_aspect('equal')
         self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
         self.fig.canvas.mpl_connect('button_press_event', self.on_mouse_click)
-        self.info_text = self.fig.text(0.02, 0.98, '', transform=self.fig.transFigure,
-                                      verticalalignment='top', fontsize=10,
-                                      bbox=dict(boxstyle='round', facecolor='lightcyan', alpha=0.9))
+        # self.info_text = self.fig.text(0.02, 0.98, '', transform=self.fig.transFigure,
+        #                               verticalalignment='top', fontsize=10,
+        #                               bbox=dict(boxstyle='round', facecolor='lightcyan', alpha=0.9))
         self.update_info_text()
-        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.output_csv = f"{output_csv}_{now}.csv"        # Write CSV header if file does not exist
-        if not os.path.exists(self.output_csv):
-            with open(self.output_csv, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(['frame', 'lidar_index', 'distance', 'u', 'v'])
-        self.current_frame_number = 0  # Update this when you advance frames
+        
+        # Update this when you advance frames
     
 
     def save_selection_to_file(self, indices, distances, uvs, frame_number):
@@ -93,21 +92,36 @@ class InteractiveLiDARVisualizer:
             writer = csv.writer(f)
             for idx, dist, (u, v) in zip(indices, distances, uvs):
                 writer.writerow([frame_number, idx, dist, u, v])
-
+   
 
     def update_info_text(self):
-        info = "CONTROLS:\n'p': Pause/Unpause | 'q': Quit | Space: Next frame | 'r': Reset selection\n"
-        info += "'z': Enable/Disable zoom mode (when paused) | Left click: Select points\n\n"
-        status_parts = []
-        status_parts.append("PAUSED" if self.paused else "PLAYING")
-        if self.zoom_enabled:
-            status_parts.append("ZOOM ENABLED")
-        info += f"STATUS: {' | '.join(status_parts)}\n\n"
-        step_indicators = [
-            "STEP 1: Pause video and enable zoom",
-            "STEP 2: Select first LiDAR point",
-            "STEP 3: Select second LiDAR point",
-            "STEP 4: Range selected automatically"
+        lines = []
+
+        # Header
+        lines.append("==================================================")
+        lines.append("          LIDAR-CAMERA INTERACTIVE STATUS         ")
+        lines.append("==================================================")
+
+        # Controls
+        lines.append("\n[Controls]")
+        lines.append("  p       → Pause / Play")
+        lines.append("  z       → Toggle zoom mode (paused only)")
+        lines.append("  r       → Reset selections")
+        lines.append("  q       → Quit")
+        lines.append("  Space   → Step to next frame (if paused)")
+
+        # System Status
+        lines.append("\n[System State]")
+        lines.append(f"  Frame Number     : {self.current_frame_number}")
+        lines.append(f"  Mode             : {'PAUSED' if self.paused else 'PLAYING'}")
+        lines.append(f"  Zoom Enabled     : {'YES' if self.zoom_enabled else 'NO'}")
+
+        # Selection Progress
+        step_labels = [
+            "Step 1: Pause and enable zoom",
+            "Step 2: Select first LiDAR point",
+            "Step 3: Select second LiDAR point",
+            "Step 4: Range automatically selected"
         ]
         if not self.paused:
             current_step = 0
@@ -119,18 +133,65 @@ class InteractiveLiDARVisualizer:
             current_step = 2
         else:
             current_step = 3
-        info += f"CURRENT: {step_indicators[current_step]}\n\n"
+        lines.append("\n[Selection Progress]")
+        lines.append(f"  Current Step     : {step_labels[current_step]}")
+
+        # First selected point
         if self.selection_step >= 1 and self.first_selected_point_3d is not None:
             x, y, z = self.first_selected_point_3d
             u, v = self.first_selected_point
-            info += f"FIRST POINT: 3D=({x:.3f}, {y:.3f}, {z:.3f})m | 2D=({u:.0f}, {v:.0f})px\n"
+            lines.append("\n[First Selected Point]")
+            lines.append(f"  3D Coordinates   : (x={x:.3f}, y={y:.3f}, z={z:.3f})")
+            lines.append(f"  2D Pixel         : (u={u:.0f}, v={v:.0f})")
+            lines.append(f"  LiDAR Index      : {self.first_selected_idx}")
+
+        # Second selected point
         if self.selection_step >= 2 and self.second_selected_point_3d is not None:
             x, y, z = self.second_selected_point_3d
             u, v = self.second_selected_point
-            info += f"SECOND POINT: 3D=({x:.3f}, {y:.3f}, {z:.3f})m | 2D=({u:.0f}, {v:.0f})px\n"
+            lines.append("\n[Second Selected Point]")
+            lines.append(f"  3D Coordinates   : (x={x:.3f}, y={y:.3f}, z={z:.3f}) m")
+            lines.append(f"  2D Pixel         : (u={u:.0f}, v={v:.0f})")
+            lines.append(f"  LiDAR Index      : {self.second_selected_idx}")
+
+        # Selected range
         if self.selection_step == 2 and len(self.selected_range_indices) > 0:
-            info += f"SELECTED RANGE: {len(self.selected_range_indices)} points between the two selections"
-        self.info_text.set_text(info)
+            lines.append("\n[Selected Range]")
+            lines.append(f"  Points Selected  : {len(self.selected_range_indices)}")
+            if self.current_ranges is not None:
+                distances = [self.current_ranges[idx] for idx in self.selected_range_indices]
+                lines.append(f"  Average Distance : {np.mean(distances):.2f} m")
+
+        # CSV log path
+        lines.append("\n[Logging]")
+        lines.append(f"  Selection saved to:")
+        lines.append(f"  {self.output_csv}")
+
+        # Reminders
+        if self.zoom_enabled:
+            lines.append("\n[Note]")
+            lines.append("  Zoom mode is currently ON.")
+            lines.append("  Disable zoom (press 'z') to select points.")
+
+        if not self.paused:
+            lines.append("\n[Note]")
+            lines.append("  Pause the video (press 'p') before selecting.")
+
+        # Render to ax_text (with dark background)
+        self.ax_text.clear()
+        self.ax_text.set_facecolor("none")
+        self.ax_text.axis("off")
+        self.ax_text.text(
+            0.01, 0.99,
+            "\n".join(lines),
+            va="top",
+            ha="left",
+            fontsize=10,
+            family="monospace",
+            color="black"
+        )
+
+
 
     def on_key_press(self, event):
         if event.key == 'p':
@@ -175,7 +236,7 @@ class InteractiveLiDARVisualizer:
         if self.zoom_enabled :
             print("desabled the zoom to select")
             return 
-        if event.inaxes != self.ax:
+        if event.inaxes != self.ax_img:
             return
         if event.button == 1:
             if self.selection_step == 0:
@@ -307,20 +368,25 @@ class InteractiveLiDARVisualizer:
             self.update_camera_display()
             self.fig.canvas.draw_idle()
 
+   
     def update_camera_display(self):
         if self.current_frame is None:
             return
-        self.ax.clear()
-        self.ax.imshow(self.current_frame)
-        self.ax.set_title('Camera Feed with LiDAR Overlay - Two-Point Selection')
+
+        self.ax_img.clear()
+        self.ax_img.imshow(self.current_frame)
+        self.ax_img.set_title('Camera Feed with LiDAR Overlay')
+
         if self.current_uv_points is not None and len(self.current_uv_points) > 0:
             img_height, img_width = self.current_frame.shape[:2]
             in_img = ((self.current_uv_points[:, 0] >= 0) & (self.current_uv_points[:, 0] < img_width) &
-                      (self.current_uv_points[:, 1] >= 0) & (self.current_uv_points[:, 1] < img_height))
+                    (self.current_uv_points[:, 1] >= 0) & (self.current_uv_points[:, 1] < img_height))
+
             if np.any(in_img):
                 visible_uv = self.current_uv_points[in_img]
-                self.ax.scatter(visible_uv[:, 0], visible_uv[:, 1],
-                               s=6, c='lightgray', alpha=0.5, marker='o', label='LiDAR Points')
+                self.ax_img.scatter(visible_uv[:, 0], visible_uv[:, 1],
+                                    s=3, c='lime', alpha=0.5, marker='o', label='LiDAR Points')
+
                 if len(self.selected_range_indices) > 0:
                     range_uv_points = []
                     for idx in self.selected_range_indices:
@@ -329,46 +395,41 @@ class InteractiveLiDARVisualizer:
 
                     if range_uv_points:
                         range_uv_points = np.array(range_uv_points)
-                        self.ax.scatter(range_uv_points[:, 0], range_uv_points[:, 1],
-                                       s=15, c='lime', alpha=0.8, marker='o',
-                                       label=f'Selected Range ({len(self.selected_range_indices)} points)')
+                        self.ax_img.scatter(range_uv_points[:, 0], range_uv_points[:, 1],
+                                            s=15, c='black', alpha=0.8, marker='.',
+                                            label=f'Selected Range ({len(self.selected_range_indices)} pts)')
+
                 if (self.first_selected_idx is not None and
                     self.first_selected_idx < len(self.current_uv_points) and
                     in_img[self.first_selected_idx]):
                     first_uv = self.current_uv_points[self.first_selected_idx]
-                    self.ax.scatter(first_uv[0], first_uv[1],
-                                   s=120, c='red', marker='X', linewidths=4,
-                                   label='First Point', edgecolors='darkred')
-                    circle1 = plt.Circle((first_uv[0], first_uv[1]), 25,
-                                        fill=False, color='red', linewidth=3)
-                    self.ax.add_patch(circle1)
+                    self.ax_img.scatter(first_uv[0], first_uv[1],
+                                        s=15, c='black', marker='x', linewidths=2)
+                    circle1 = plt.Circle((first_uv[0], first_uv[1]), 10,
+                                        fill=False, color='black', linewidth=1)
+                    self.ax_img.add_patch(circle1)
+
                 if (self.second_selected_idx is not None and
                     self.second_selected_idx < len(self.current_uv_points) and
                     in_img[self.second_selected_idx]):
                     second_uv = self.current_uv_points[self.second_selected_idx]
-                    self.ax.scatter(second_uv[0], second_uv[1],
-                                   s=120, c='blue', marker='X', linewidths=4,
-                                   label='Second Point', edgecolors='darkblue')
-                    circle2 = plt.Circle((second_uv[0], second_uv[1]), 25,
-                                        fill=False, color='blue', linewidth=3)
-                    self.ax.add_patch(circle2)
+                    self.ax_img.scatter(second_uv[0], second_uv[1],
+                                        s=15, c='black', marker='x', linewidths=2
+                                        )
+                    circle2 = plt.Circle((second_uv[0], second_uv[1]), 10,
+                                        fill=False, color='black', linewidth=1)
+                    self.ax_img.add_patch(circle2)
+
                 if (self.first_selected_idx is not None and self.second_selected_idx is not None and
                     self.first_selected_idx < len(self.current_uv_points) and self.second_selected_idx < len(self.current_uv_points) and
                     in_img[self.first_selected_idx] and in_img[self.second_selected_idx]):
                     first_uv = self.current_uv_points[self.first_selected_idx]
                     second_uv = self.current_uv_points[self.second_selected_idx]
-                    self.ax.plot([first_uv[0], second_uv[0]], [first_uv[1], second_uv[1]],
-                                'r--', linewidth=2, alpha=0.7, label='Selection Line')
-                    # Show lidar indices for selected range (only for clarity)
-                if len(self.selected_range_indices) > 0:
-                    for idx in self.selected_range_indices:
-                        if idx < len(self.current_uv_points):
-                            u, v = self.current_uv_points[idx]
-                            self.ax.text(u, v, str(idx), color='black', fontsize=12, alpha=0.7)
+                    
 
-        self.ax.axis('off')
+        self.ax_img.axis('off')
         if self.current_uv_points is not None and len(self.current_uv_points) > 0:
-            self.ax.legend(loc='upper right', fontsize=8)
+            self.ax_img.legend(loc='upper right', fontsize=8)
 
 # ────────────── Helper Functions ──────────────
 
@@ -414,6 +475,21 @@ def deserialize_message_safe(raw: bytes, msg_type: Any) -> Optional[Any]:
     except Exception as exc:
         print(f"Deserialization failed for {msg_type}: {exc}")
         return None
+
+def save_intrinsics_and_extrinsics(K: np.ndarray, T_lidar_to_cam: np.ndarray, output_dir: str = "."):
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = os.path.join(output_dir, f"extrinsic_intrinsic_{now}.txt")
+
+        with open(filename, "w") as f:
+            f.write("Camera Intrinsic Matrix (K):\n")
+            for row in K:
+                f.write("  " + "  ".join(f"{val:.6f}" for val in row) + "\n")
+
+            f.write("\nExtrinsic Matrix (LiDAR to Camera - 4x4):\n")
+            for row in T_lidar_to_cam:
+                f.write("  " + "  ".join(f"{val:.6f}" for val in row) + "\n")
+
+        print(f"[INFO] Intrinsic and extrinsic matrices saved to: {filename}")
 
 def open_bag_reader(path: Path) -> SequentialReader:
     if path.is_file() and path.suffix == ".db3":
@@ -486,62 +562,85 @@ def main():
     bridge = CvBridge()
 
     reader = open_bag_reader(bag_path)
-    available = analyze_bag_topics(reader)
+    available = analyze_bag_topics(reader) # print all the available topics
     if args.analyze:
         return
 
-    type_map = get_message_type_map()
+    type_map = get_message_type_map() # get all topic name and also the msg type 
     type_map[args.scan_topic] = LaserScan
     type_map[args.image_topic] = Image
     type_map[args.camera_info_topic] = CameraInfo
 
     tf_buffer, cam_info = collect_static_data(
         reader, type_map, args.lidar_frame, args.camera_frame, args.camera_info_topic
-    )
-    K = np.array(cam_info.k).reshape(3, 3)
-    visualizer = InteractiveLiDARVisualizer(cam_info)
-    reader = open_bag_reader(bag_path)
-    pending_scans: List[Tuple[float, LaserScan]] = []
-    processed = 0
+    ) # extracts the static transforms "TF" and the camera's informations 
+    K = np.array(cam_info.k).reshape(3, 3) # extracts the intrinsic matrix 
+    visualizer = InteractiveLiDARVisualizer(cam_info) # initializes the matplotlib visualizer to allow the selectio to display 
+    reader = open_bag_reader(bag_path) # reopen the bag 
+    pending_scans: List[Tuple[float, LaserScan]] = [] # buffer for recent LiDAR scans
+    processed = 0  # frame counter
 
     try:
-        while reader.has_next() and not visualizer.quit_requested:
-            if visualizer.paused:
+        while reader.has_next() and not visualizer.quit_requested: # read the messages until the end or the user quits
+            if visualizer.paused: # wait if the visualizer is paused 
                 plt.pause(0.1)
                 continue
-            topic, raw, t_nsec = reader.read_next()
-            if topic not in type_map:
+
+            topic, raw, t_nsec = reader.read_next() # the next message from the bag 
+
+
+            if topic not in type_map: # skip irrelevants topics
                 continue
-            msg = deserialize_message_safe(raw, type_map[topic])
+
+
+            msg = deserialize_message_safe(raw, type_map[topic]) # Try to convert the raw binary message into a usable ROS 2 message
             if msg is None:
                 continue
-            t = t_nsec / 1e9
-            if topic == args.scan_topic:
-                pending_scans.append((t, msg))
-                pending_scans = pending_scans[-300:]
+
+
+            t = t_nsec / 1e9 # convert time to second 
+
+
+            if topic == args.scan_topic: # if is it the topic  scan 
+                pending_scans.append((t, msg)) # add it to the buffer 
+                pending_scans = pending_scans[-300:] # keep  just 300 messages 
+                continue 
+
+
+            if topic != args.image_topic or not pending_scans: # on focus on LiDAR and image topics 
                 continue
-            if topic != args.image_topic or not pending_scans:
+
+
+            # synchronization of the LiDAR data and images     
+            times = np.array([s[0] for s in pending_scans]) # Find the LiDAR scan closest in time to this image 
+            idx = int(np.argmin(np.abs(times - t))) # return the best arg
+            if abs(times[idx] - t) > args.dt: # skip if the don't match 
                 continue
-            times = np.array([s[0] for s in pending_scans])
-            idx = int(np.argmin(np.abs(times - t)))
-            if abs(times[idx] - t) > args.dt:
-                continue
-            _, scan = pending_scans.pop(idx)
-            r = np.asarray(scan.ranges)
-            valid = np.isfinite(r) & (scan.range_min < r) & (r < scan.range_max)
+
+
+            _, scan = pending_scans.pop(idx) # Get the matched scan and remove it from the buffer
+
+            # convert scan to 3d point 
+            r = np.asarray(scan.ranges) 
+            valid = np.isfinite(r) & (scan.range_min < r) & (r < scan.range_max) # filter the lidar points
             if not np.any(valid):
                 continue
-            a = scan.angle_min + np.arange(len(r)) * scan.angle_increment
-            x_l = r[valid] * np.cos(a[valid])
+            a = scan.angle_min + np.arange(len(r)) * scan.angle_increment # raw that contains the angle
+            x_l = r[valid] * np.cos(a[valid]) # convert the polar coordinate into the cartesian coordinate 
             y_l = r[valid] * np.sin(a[valid])
-            pts_l = np.column_stack((x_l, y_l, np.zeros_like(x_l), np.ones_like(x_l)))
+            pts_l = np.column_stack((x_l, y_l, np.zeros_like(x_l), np.ones_like(x_l))) # add the hemegenous coordinate x,y,0,1
+            # get the transformation matrix from the lidar to camera fram
             T = transform_to_matrix(tf_buffer.lookup_transform(args.camera_frame, args.lidar_frame, TimeMsg()))
-            pts_c = (T @ pts_l.T).T[:, :3]
+            pts_c = (T @ pts_l.T).T[:, :3] # applies the transformation 
+            # filter the lidar points that are outside the camera frame 
             in_front = pts_c[:, 2] > 1e-2
-            uv = project_points(pts_c, K)
+
+            uv = project_points(pts_c, K) # use the intrinsic parameters to peoject the Lidar point on the camera pixels frame 
             img_bgr = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
             img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             processed += 1
+            if processed ==2:
+                save_intrinsics_and_extrinsics(K, T)    
             visualizer.update_display(img_rgb, pts_c[in_front], uv, lidar_ranges=r[valid][in_front])   
             if processed % 50 == 0:
                 print(f"Processed {processed} frames")
@@ -554,3 +653,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
