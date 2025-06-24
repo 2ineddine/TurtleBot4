@@ -510,10 +510,24 @@ from sensor_msgs.msg import CameraInfo, LaserScan, Image
 from tf2_msgs.msg import TFMessage
 from tf2_ros import Buffer, LookupException
 import yaml 
+from chessboard_calibration import ChessboardPlaneCalibrator
+from types import MethodType
+from types import MethodType
+from chessboard_calibration import save_selection_to_file_chessboard
+from chessboard_calibration import (       # NEW
+    ChessboardPlaneCalibrator,
+    save_selection_to_file_chessboard,
+)
 # ────────────── Interactive Visualizer Class ──────────────
 
 class InteractiveLiDARVisualizer:
     def __init__(self, cam_info: CameraInfo,output_csv="lidar_selection_log.csv"):
+        self.chessboard_calibrator = ChessboardPlaneCalibrator(
+        chessboard_size=(7, 10),     # Update if needed
+        square_size=0.025
+        )
+        self.save_selection_to_file = MethodType(
+        save_selection_to_file_chessboard, self)       
         self.current_frame_number = 0  
         self.cam_info = cam_info
         self.paused = False
@@ -528,6 +542,7 @@ class InteractiveLiDARVisualizer:
             with open(self.output_csv, 'w', newline='') as f:
                 writer = csv.writer(f)
                 #writer.writerow(['frame', 'lidar_index', 'distance', 'u', 'v'])
+        self.save_selection_to_file = MethodType(save_selection_to_file_chessboard, self)
         # Selection state
         self.selection_step = 0
         self.first_selected_point = None
@@ -554,16 +569,49 @@ class InteractiveLiDARVisualizer:
         # Update this when you advance frames
     
 
-    def save_selection_to_file(self, indices, distances, uvs, frame_number):
-        """Append selected 2D-3D correspondences to a CSV file in 'u,v,x,y,z' format."""
-        with open(self.output_csv, 'a', newline='') as f:
-            writer = csv.writer(f)
-            for idx, dist, (u, v) in zip(indices, distances, uvs):
-                angle = self.current_scan_angle_min + idx * self.current_scan_angle_increment
-                x = dist * np.cos(angle)
-                y = dist * np.sin(angle)
-                z = 0.0  # 2D LiDAR assumption
-                writer.writerow([u, v, x, y, z])
+    # def save_selection_to_file(self, indices, distances, uvs, frame_number):
+    #     """Append selected 2D-3D correspondences to a CSV file in 'u,v,x,y,z' format."""
+    #     with open(self.output_csv, 'a', newline='') as f:
+    #         writer = csv.writer(f)
+    #         for idx, dist, (u, v) in zip(indices, distances, uvs):
+    #             angle = self.current_scan_angle_min + idx * self.current_scan_angle_increment
+    #             x = dist * np.cos(angle)
+    #             y = dist * np.sin(angle)
+    #             z = 0.0  # 2D LiDAR assumption
+    #             writer.writerow([u, v, x, y, z])
+
+
+    # def save_selection_to_file(self, indices, distances, uvs, frame_number):
+    #     """Append selected 2D-3D correspondences with plane parameters."""
+    #     # Build 3D points
+    #     angle_min = self.current_scan.angle_min
+    #     angle_inc = self.current_scan.angle_increment
+    #     points_3d = []
+    #     for idx in indices:
+    #         dist = self.current_ranges[idx]
+    #         angle = angle_min + idx * angle_inc
+    #         x = dist * np.cos(angle)
+    #         y = dist * np.sin(angle)
+    #         z = 0.0  # 2D LiDAR
+    #         points_3d.append([x, y, z])
+    #     points_3d = np.array(points_3d)
+
+    #     # Fit plane using SVD
+    #     centroid = np.mean(points_3d, axis=0)
+    #     centered = points_3d - centroid
+    #     _, _, vh = np.linalg.svd(centered)
+    #     normal = vh[-1]
+    #     normal /= np.linalg.norm(normal)
+    #     a, b, c = normal
+    #     d = -np.dot(normal, centroid)
+    #     print(f"[DEBUG] Normal vector: a={a:.4f}, b={b:.4f}, c={c:.4f}, d={d:.4f}")
+
+    #     # Save extended CSV
+    #     with open(self.output_csv, 'a', newline='') as f:
+    #         writer = csv.writer(f)
+    #         for (idx, dist, (u, v), (x, y, z)) in zip(indices, distances, uvs, points_3d):
+    #             writer.writerow([u, v, x, y, z, d, a, b, c])
+
 
    
 
