@@ -1,0 +1,41 @@
+running egg_info
+creating ../../build/camera_odom_fusion/camera_odom_fusion.egg-info
+writing ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/PKG-INFO
+writing dependency_links to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/dependency_links.txt
+writing entry points to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/entry_points.txt
+writing requirements to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/requires.txt
+writing top-level names to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/top_level.txt
+writing manifest file '../../build/camera_odom_fusion/camera_odom_fusion.egg-info/SOURCES.txt'
+reading manifest file '../../build/camera_odom_fusion/camera_odom_fusion.egg-info/SOURCES.txt'
+writing manifest file '../../build/camera_odom_fusion/camera_odom_fusion.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+copying camera_odom_fusion/ekf_treatment.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+copying camera_odom_fusion/camera_treatement.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+copying camera_odom_fusion/__init__.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+copying camera_odom_fusion/camera_ekf.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+running install
+running install_lib
+creating /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion
+copying /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion/ekf_treatment.py -> /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion
+copying /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion/camera_treatement.py -> /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion
+copying /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion/__init__.py -> /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion
+copying /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion/camera_ekf.py -> /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion
+byte-compiling /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion/ekf_treatment.py to ekf_treatment.cpython-310.pyc
+byte-compiling /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion/camera_treatement.py to camera_treatement.cpython-310.pyc
+byte-compiling /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion/camera_ekf.py to camera_ekf.cpython-310.pyc
+running install_data
+creating /home/zineddine/ros2_ws/install/camera_odom_fusion/share/ament_index/resource_index/packages
+copying resource/camera_odom_fusion -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/ament_index/resource_index/packages
+copying package.xml -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/camera_odom_fusion
+copying camera_odom_fusion/base2lidar_matrix.yaml -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/camera_odom_fusion
+copying camera_odom_fusion/Lidar2camera_matrix.yaml -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/camera_odom_fusion
+copying camera_odom_fusion/base_to_lidar.yaml -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/camera_odom_fusion
+running install_egg_info
+Copying ../../build/camera_odom_fusion/camera_odom_fusion.egg-info to /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion-0.0.0-py3.10.egg-info
+running install_scripts
+Installing camera script to /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/camera_odom_fusion
+Installing ekf script to /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/camera_odom_fusion
+writing list of installed files to '/home/zineddine/ros2_ws/build/camera_odom_fusion/install.log'

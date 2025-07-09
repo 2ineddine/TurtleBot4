@@ -1,0 +1,6 @@
+ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+  File "/home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion/ekf_treatment.py", line 453
+    else:
+    ^^^^
+SyntaxError: invalid syntax
+

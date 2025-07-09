@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: camera_odom_fusion
+Version: 0.0.0
+Summary: Camera + Odometry fusion
+Maintainer: zineddine
+Maintainer-email: zbou6599@gmail.com
+License: MIT
+Requires-Dist: setuptools
+Dynamic: license
+Dynamic: maintainer
+Dynamic: maintainer-email
+Dynamic: requires-dist
+Dynamic: summary

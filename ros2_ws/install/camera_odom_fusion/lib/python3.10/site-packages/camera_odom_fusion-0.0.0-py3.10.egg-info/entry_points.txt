@@ -1,0 +1,3 @@
+[console_scripts]
+camera = camera_odom_fusion.camera_treatement:main
+ekf = camera_odom_fusion.ekf_treatment:main
