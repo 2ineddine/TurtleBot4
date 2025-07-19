@@ -1,0 +1,2 @@
+ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+error: can't copy 'base2lidar_matrix.yaml': doesn't exist or not a regular file

@@ -1,9 +1,9 @@
 Metadata-Version: 2.4
 Name: camera_odom_fusion
 Version: 0.0.0
-Summary: Camera + Odometry fusion
-Maintainer: zineddine
-Maintainer-email: zbou6599@gmail.com
+Summary: direct application of the EKF
+Maintainer: 2ineddine
+Maintainer-email: ririr23@gmail.com
 License: MIT
 Requires-Dist: setuptools
 Dynamic: license

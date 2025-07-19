@@ -1,0 +1,31 @@
+[1.287s] Invoking command in '/home/zineddine/ros2_ws/src/camera_odom_fusion': PYTHONPATH=/home/zineddine/ros2_ws/build/camera_odom_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/camera_odom_fusion build --build-base /home/zineddine/ros2_ws/build/camera_odom_fusion/build install --record /home/zineddine/ros2_ws/build/camera_odom_fusion/install.log --single-version-externally-managed install_data
+[1.746s] running egg_info
+[1.770s] writing ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/PKG-INFO
+[1.771s] writing dependency_links to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/dependency_links.txt
+[1.771s] writing entry points to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/entry_points.txt
+[1.771s] writing requirements to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/requires.txt
+[1.772s] writing top-level names to ../../build/camera_odom_fusion/camera_odom_fusion.egg-info/top_level.txt
+[1.894s] ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+[2.068s] reading manifest file '../../build/camera_odom_fusion/camera_odom_fusion.egg-info/SOURCES.txt'
+[2.070s] writing manifest file '../../build/camera_odom_fusion/camera_odom_fusion.egg-info/SOURCES.txt'
+[2.070s] running build
+[2.070s] running build_py
+[2.070s] copying camera_odom_fusion/ekf_treatment.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+[2.070s] copying camera_odom_fusion/camera_treatement.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+[2.071s] copying camera_odom_fusion/__init__.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+[2.071s] copying camera_odom_fusion/camera_ekf.py -> /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion
+[2.072s] running install
+[2.079s] running install_lib
+[2.105s] copying /home/zineddine/ros2_ws/build/camera_odom_fusion/build/lib/camera_odom_fusion/camera_ekf.py -> /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion
+[2.106s] byte-compiling /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion/camera_ekf.py to camera_ekf.cpython-310.pyc
+[2.109s] running install_data
+[2.110s] copying resource/camera_odom_fusion -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/ament_index/resource_index/packages
+[2.110s] copying package.xml -> /home/zineddine/ros2_ws/install/camera_odom_fusion/share/camera_odom_fusion
+[2.111s] running install_egg_info
+[2.143s] removing '/home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion-0.0.0-py3.10.egg-info' (and everything under it)
+[2.143s] Copying ../../build/camera_odom_fusion/camera_odom_fusion.egg-info to /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages/camera_odom_fusion-0.0.0-py3.10.egg-info
+[2.145s] running install_scripts
+[2.198s] Installing camera script to /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/camera_odom_fusion
+[2.198s] Installing ekf script to /home/zineddine/ros2_ws/install/camera_odom_fusion/lib/camera_odom_fusion
+[2.199s] writing list of installed files to '/home/zineddine/ros2_ws/build/camera_odom_fusion/install.log'
+[2.242s] Invoked command in '/home/zineddine/ros2_ws/src/camera_odom_fusion' returned '0': PYTHONPATH=/home/zineddine/ros2_ws/build/camera_odom_fusion/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/zineddine/ros2_ws/install/camera_odom_fusion/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/camera_odom_fusion build --build-base /home/zineddine/ros2_ws/build/camera_odom_fusion/build install --record /home/zineddine/ros2_ws/build/camera_odom_fusion/install.log --single-version-externally-managed install_data

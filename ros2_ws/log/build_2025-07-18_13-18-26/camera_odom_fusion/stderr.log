@@ -1,0 +1,2 @@
+ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+Sorry: IndentationError: expected an indented block after 'except' statement on line 1072 (camera_treatement.py, line 1077)

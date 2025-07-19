@@ -16,6 +16,7 @@ camera_odom_fusion/base_to_lidar.yaml
 camera_odom_fusion/camera_ekf.py
 camera_odom_fusion/camera_treatement.py
 camera_odom_fusion/ekf_treatment.py
+launch/ekf.launch.py
 resource/camera_odom_fusion
 test/test_copyright.py
 test/test_flake8.py
